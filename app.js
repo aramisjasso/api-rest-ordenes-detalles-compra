@@ -6,7 +6,7 @@ const app = express();
 const __dirname = path.resolve();
 
 app.use(express.json()); // Permitir JSON en las peticiones
-app.use("/apiV1/task", taskRoutes);
+app.use("/apiV1/Ordenes", taskRoutes);
 
 // Servir archivos estáticos desde la carpeta "public"
 app.use(express.static(path.join(__dirname, "public")));

@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Función para cargar y mostrar las tareas
     const loadTasks = async () => {
         try {
-            const response = await fetch("/apiV1/task");
+            const response = await fetch("/apiV1/ordenes");
             const tasks = await response.json();
             taskList.innerHTML = ""; // Limpiar la lista
             tasks.forEach(task => {

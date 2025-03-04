@@ -2,18 +2,25 @@
 import db from "../models/firebase.js";
 import { collection, getDocs, doc, getDoc, addDoc, updateDoc } from "firebase/firestore";
 
-// Obtener todas las tareas
-export const getAllTasks = async (req, res) => {
+// Obtener todas las órdenes desde Firestore
+export const getAllOrders = async (req, res) => {
     try {
-        const tasksRef = collection(db, "tasks"); // Referencia a la colección "tasks"
-        const snapshot = await getDocs(tasksRef); // Obtener todos los documentos
-        const tasks = [];
-        snapshot.forEach((doc) => {
-            tasks.push({ id: doc.id, ...doc.data() }); // Agregar cada tarea al array
-        });
-        res.status(200).json(tasks);
+        const querySnapshot = await getDocs(collection(db, "Ordenes"));
+        const orders = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            clienteId: doc.data().clienteId,
+            fechaPedido: doc.data().fechaPedido,
+            total: doc.data().total,
+            estado: doc.data().estado,
+            productos: doc.data().productos || [],
+            descuentosAplicados: doc.data().descuentosAplicados || [],
+            estadoEnvio: doc.data().estadoEnvio || {}
+        }));
+
+        res.status(200).json(orders);
     } catch (error) {
-        res.status(500).json({ message: "Error al obtener las tareas", error });
+        console.error("Error obteniendo órdenes:", error);
+        res.status(500).json({ error: "Error obteniendo órdenes" });
     }
 };
 
