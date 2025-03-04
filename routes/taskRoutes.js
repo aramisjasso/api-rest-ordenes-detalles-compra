@@ -7,7 +7,11 @@ const router = express.Router();
 
 router.get("/", getAllOrders);
 
-
+// RUTAS PARA PEDIDOS
+//router.get("/pedidos", getPedidos);
+router.get("/pedidos/:id/productos", getProductos);
+router.get("/pedidos/:id/descuentos", getDescuentos);
+router.get("/pedidos/:id/estado-envio", getEstadoEnvio);
 
 
 
