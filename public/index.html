@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API de Tareas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>API de Tareas</h1>
+        <p>Esta es una interfaz para interactuar con la API de tareas.</p>
+
+        <!-- Sección de la lista de tareas -->
+        <h2>Lista de Tareas</h2>
+        <ul id="task-list"></ul>
+
+        <!-- Sección para crear una nueva tarea -->
+        <h2>Crear Nueva Tarea</h2>
+        <form id="create-task-form">
+            <input type="text" id="task-title" placeholder="Título de la tarea" required>
+            <button type="submit">Crear Tarea</button>
+        </form>
+
+        <!-- Sección de documentación de la API -->
+        <h2>Documentación de la API</h2>
+        <div class="api-docs">
+            <h3>Obtener todas las tareas</h3>
+            <pre><code>GET /apiV1/task</code></pre>
+            <p>Devuelve una lista de todas las tareas.</p>
+
+            <h3>Obtener una tarea por ID</h3>
+            <pre><code>GET /apiV1/task/{id}</code></pre>
+            <p>Devuelve una tarea específica por su ID.</p>
+
+            <h3>Crear una nueva tarea</h3>
+            <pre><code>POST /apiV1/task</code></pre>
+            <p>Crea una nueva tarea. El cuerpo de la solicitud debe ser un JSON con el campo <code>title</code>.</p>
+            <pre><code>{
+    "title": "Nueva tarea"
+}</code></pre>
+
+            <h3>Actualizar una tarea</h3>
+            <pre><code>PUT /apiV1/task/{id}</code></pre>
+            <p>Actualiza una tarea existente. El cuerpo de la solicitud debe ser un JSON con el campo <code>title</code>.</p>
+            <pre><code>{
+    "title": "Tarea actualizada"
+}</code></pre>
+
+            
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
