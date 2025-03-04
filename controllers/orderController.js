@@ -23,6 +23,24 @@ export const getAllOrders = async (req, res) => {
     }
 };
 
+// Obtener un pedido por ID
+export const getOrderById = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const orderRef = doc(db, "orders", id);
+        const orderSnap = await getDoc(orderRef);
+
+        if (!orderSnap.exists()) {
+            return res.status(404).json({ message: "Pedido no encontrado" });
+        }
+
+        res.status(200).json({ id: orderSnap.id, ...orderSnap.data() });
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener el pedido", error });
+    }
+};
+
 // Obtener productos de un pedido específico
 export const getOrderProducts = async (req, res) => {
     const { id } = req.params;
