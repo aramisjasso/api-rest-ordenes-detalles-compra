@@ -5,7 +5,7 @@ import { collection, getDocs, doc, getDoc, addDoc, updateDoc } from "firebase/fi
 // Obtener todas las órdenes desde Firestore
 export const getAllOrders = async (req, res) => {
     try {
-        const querySnapshot = await getDocs(collection(db, "Ordenes"));
+        const querySnapshot = await getDocs(collection(db, "orders"));
         const orders = querySnapshot.docs.map(doc => ({
             id: doc.id,
             clienteId: doc.data().clienteId,
