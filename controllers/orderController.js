@@ -161,3 +161,61 @@ export const deleteOrder = async (req, res) => {
         res.status(500).json({ message: "Error al eliminar el pedido", error });
     }
 };
+
+// Mapeo de estados de envío a estados de pedido
+const estadoPedidoPorEnvio = {
+    "Preparando": "Pendiente",
+    "En camino": "En tránsito",
+    "Entregado": "Completado",
+    "Devuelto": "Devuelto",
+    "Cancelado": "Cancelado"
+};
+
+// Estados finales que no deben cambiar
+const estadosFinales = ["Completado", "Cancelado", "Devuelto"];
+
+// Actualizar estado del pedido basado en evento de transporte
+export const updateOrderStatusByShipping = async (req, res) => {
+    const { id } = req.params;
+    const { nuevoEstadoEnvio, ubicacionActual } = req.body;
+
+    try {
+        const orderRef = doc(db, "orders", id);
+        const orderSnap = await getDoc(orderRef);
+
+        if (!orderSnap.exists()) {
+            return res.status(404).json({ message: "Pedido no encontrado" });
+        }
+
+        const orderData = orderSnap.data();
+
+        // Si el estado actual ya es final, no lo actualizamos
+        if (estadosFinales.includes(orderData.estado)) {
+            return res.status(400).json({ message: "No se puede modificar un pedido en estado final" });
+        }
+
+        const nuevoEstadoPedido = estadoPedidoPorEnvio[nuevoEstadoEnvio] || orderData.estado;
+
+        // Historial de estados
+        const historialEstados = orderData.historialEstados || [];
+        historialEstados.push({
+            estadoAnterior: orderData.estado,
+            nuevoEstado: nuevoEstadoPedido,
+            fechaCambio: new Date().toISOString()
+        });
+
+        await updateDoc(orderRef, {
+            estado: nuevoEstadoPedido,
+            estadoEnvio: {
+                estadoActual: nuevoEstadoEnvio,
+                ubicacionActual: ubicacionActual || orderData.estadoEnvio.ubicacionActual,
+                fechaActualizacion: new Date().toISOString()
+            },
+            historialEstados
+        });
+
+        res.status(200).json({ message: "Estado del pedido actualizado", estado: nuevoEstadoPedido, estadoEnvio: nuevoEstadoEnvio });
+    } catch (error) {
+        res.status(500).json({ message: "Error al actualizar el estado del pedido", error });
+    }
+};
