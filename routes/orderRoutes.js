@@ -11,5 +11,6 @@ router.get("/:id/envio", getOrderShippingStatus);
 router.post("/", createOrder);
 router.put("/:id", updateOrder);
 router.delete("/:id", deleteOrder);
+router.put("/:id/status", updateOrderStatusByShipping);
 
 export default router;
