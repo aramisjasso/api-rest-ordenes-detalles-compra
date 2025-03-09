@@ -219,3 +219,53 @@ export const updateOrderStatusByShipping = async (req, res) => {
         res.status(500).json({ message: "Error al actualizar el estado del pedido", error });
     }
 };
+
+
+export const applyDiscountToOrder = async (req, res) => {
+    // Extraemos el ID de la orden desde los parámetros de la solicitud
+    const { id } = req.params; // ID de la orden
+    // Extraemos el cupón (con el código, porcentaje y vigencia) desde el cuerpo de la solicitud
+    const { cupón } = req.body; // Datos del cupón enviados en el cuerpo
+
+    try {
+        // Obtenemos una referencia al documento de la orden específica en Firestore utilizando el ID
+        const orderRef = doc(db, "orders", id);
+
+        // Creamos el objeto del descuento con la información del cupón que se envió
+        const descuento = {
+            codigo: cupón.codigo, // El código del cupón
+            porcentaje: cupón.porcentaje, // El porcentaje de descuento
+            vigencia: cupón.vigencia // La fecha de vigencia del cupón
+        };
+
+        // Intentamos obtener el documento de la orden desde Firestore
+        const orderSnap = await getDoc(orderRef);
+
+        // Si no se encuentra el documento (la orden no existe), enviamos un error 404
+        if (!orderSnap.exists()) {
+            return res.status(404).json({ message: "Pedido no encontrado" });
+        }
+
+        // Extraemos los datos de la orden desde el snapshot de Firestore
+        const orderData = orderSnap.data();
+
+        // Si la orden ya tiene descuentos aplicados, los añadimos al nuevo arreglo
+        // Si no tiene descuentos aplicados, inicializamos el arreglo vacío
+        const updatedDiscounts = [...orderData.descuentosAplicados || [], descuento];
+
+        // Actualizamos la orden en Firestore, agregando los nuevos descuentos
+        await updateDoc(orderRef, {
+            descuentosAplicados: updatedDiscounts // Actualizamos la lista de descuentos aplicados
+        });
+
+        // Respondemos con un mensaje de éxito, enviando el descuento aplicado
+        res.status(200).json({
+            message: "Descuento aplicado correctamente", // Mensaje indicando que el descuento fue aplicado
+            descuento: descuento // Enviamos el objeto del descuento aplicado
+        });
+    } catch (error) {
+        // En caso de error en el proceso (por ejemplo, error de conexión a Firestore), mostramos el error
+        console.error("Error al aplicar el descuento:", error);
+        res.status(500).json({ message: "Error al aplicar el descuento", error }); // Respuesta de error del servidor
+    }
+};
