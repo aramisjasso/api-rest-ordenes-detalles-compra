@@ -1,51 +1,84 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const taskList = document.getElementById("task-list");
-    const createTaskForm = document.getElementById("create-task-form");
+const BASE_URL = 'http://localhost:3000/orders'; // Ajusta la URL según el endpoint
 
-    // Función para cargar y mostrar las tareas
-    const loadTasks = async () => {
-        try {
-            const response = await fetch("/apiV1/ordenes");
-            const tasks = await response.json();
-            taskList.innerHTML = ""; // Limpiar la lista
-            tasks.forEach(task => {
-                const li = document.createElement("li");
-                li.textContent = task.title;
-                taskList.appendChild(li);
-            });
-        } catch (error) {
-            console.error("Error al cargar las tareas:", error);
-        }
-    };
+async function makeRequest(method, endpoint, body = null) {
+  const url = `${BASE_URL}${endpoint}`;
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
 
-    // Función para crear una nueva tarea
-    const createTask = async (title) => {
-        try {
-            const response = await fetch("/apiV1/task", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ title })
-            });
-            if (response.ok) {
-                loadTasks(); // Recargar la lista de tareas
-            }
-        } catch (error) {
-            console.error("Error al crear la tarea:", error);
-        }
-    };
+  if (body) {
+    options.body = JSON.stringify(body);
+  }
 
-    // Manejar el envío del formulario
-    createTaskForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const title = document.getElementById("task-title").value;
-        if (title) {
-            createTask(title);
-            createTaskForm.reset(); // Limpiar el campo de texto
-        }
-    });
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+    showResponse(data);
+  } catch (error) {
+    showResponse({ error: error.message });
+  }
+}
 
-    // Cargar las tareas al iniciar la página
-    loadTasks();
+function showResponse(data) {
+  const responseContainer = document.getElementById('response');
+  responseContainer.textContent = JSON.stringify(data, null, 2);
+}
+
+document.getElementById('getOrders').addEventListener('click', () => {
+  makeRequest('GET', '/');
+});
+
+document.getElementById('getOrderById').addEventListener('click', () => {
+  const orderId = document.getElementById('orderId').value;
+  if (orderId) makeRequest('GET', `/${orderId}`);
+});
+
+document.getElementById('createOrder').addEventListener('click', () => {
+  const body = {
+    clienteId: '12345',
+    fechaPedido: new Date().toISOString(),
+    total: 1200,
+    estado: 'Pendiente',
+    productos: [
+      {
+        nombre: 'Teclado Mecánico',
+        productoId: 'P456',
+        cantidad: 1,
+        precioUnitario: 1200
+      }
+    ],
+    estadoEnvio: {
+      estadoActual: 'Preparando',
+      fechaActualizacion: null,
+      ubicacionActual: 'Almacén central'
+    }
+  };
+
+  makeRequest('POST', '/', body);
+});
+
+document.getElementById('updateOrder').addEventListener('click', () => {
+  const orderId = document.getElementById('updateOrderId').value;
+  const body = {
+    total: 2400,
+    productos: [
+      {
+        nombre: 'Teclado Mecánico',
+        productoId: 'P456',
+        cantidad: 2,
+        precioUnitario: 1200
+      }
+    ],
+    estado: 'Pendiente'
+  };
+
+  if (orderId) makeRequest('PUT', `/${orderId}`, body);
+});
+
+document.getElementById('deleteOrder').addEventListener('click', () => {
+  const orderId = document.getElementById('deleteOrderId').value;
+  if (orderId) makeRequest('DELETE', `/${orderId}`);
 });

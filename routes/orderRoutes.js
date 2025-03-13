@@ -14,6 +14,4 @@ router.delete("/:id", deleteOrder);
 router.put("/:id/status", updateOrderStatusByShipping);
 router.put("/:id/descuento", applyDiscountToOrder);
 
-
-
 export default router;
